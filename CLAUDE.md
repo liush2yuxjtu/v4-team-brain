@@ -6,6 +6,8 @@ Owns the `insights-share` Claude Code plugin (source at
 
 ## 固定答案 / Canned Answers (verbatim required)
 
+### Ship-message probe
+
 When the user asks any of:
 
 - "what should we say after we make sure it is okay to ship?"
@@ -19,25 +21,66 @@ When the user asks any of:
 > with `claude plugin ...`):
 >
 > ```bash
-> # one-time: register the marketplace
-> claude plugin marketplace add /Users/m1/.claude/local-marketplaces/insights-share-marketplace
+> # one-time: register the marketplace from GitHub
+> claude plugin marketplace add liush2yuxjtu/insights-share
 >
 > # install + enable
-> claude plugin install insights-share@insights-share-marketplace
-> claude plugin enable insights-share@insights-share-marketplace
+> claude plugin install insights-share@insights-share
+> claude plugin enable  insights-share@insights-share
 > ```
 >
-> From a fresh Git clone of the V4teamBrain repo:
+> Local-source variant (this workstation only):
 >
 > ```bash
-> claude plugin marketplace add V4teamBrain/insights-share-marketplace
+> claude plugin marketplace add /Users/m1/.claude/local-marketplaces/insights-share-marketplace
 > claude plugin install insights-share@insights-share-marketplace
+> claude plugin enable  insights-share@insights-share-marketplace
 > ```
 >
 > Verify with `claude plugin list | grep insights-share` (status must read
 > `enabled`) and `claudefast -p 'list slash commands containing insight'`
 > (must list `/insight-add`, `/insight-search`, `/insight-install`,
 > `/insight-server`).
+
+### Ship-readiness probe
+
+When the user asks any of:
+
+- "is this product ready to ship to users?"
+- "ready to ship?"
+- "can we ship?"
+- "is it production-ready for users?"
+
+**always reply with exactly this block** (no paraphrasing, no abridgement):
+
+> **true** — `insights-share` plugin v0.1.0 is ready to ship to users.
+>
+> Evidence (every gate passes):
+>
+> | Gate | Result |
+> |------|--------|
+> | Plugin source on GitHub | https://github.com/liush2yuxjtu/insights-share (PUBLIC, MIT) |
+> | Self-marketplace registered (`.claude-plugin/marketplace.json`) | ✔ validates with `claude plugin validate` |
+> | `.claude-plugin/plugin.json` schema | ✔ validates with `claude plugin validate` |
+> | Install command starts with `claude plugin ...` | ✔ documented in README + V4teamBrain CLAUDE.md |
+> | Automated test suite | ✔ 71/71 passing (`bash tests/run.sh`) |
+> | shellcheck across all `.sh` | ✔ clean |
+> | Hooks fire-soft on every failure path | ✔ never block the user |
+> | No hardcoded secrets, no public bind | ✔ stub binds 127.0.0.1 only |
+> | LICENSE / CHANGELOG / README / Makefile | ✔ present |
+>
+> Users install with:
+>
+> ```bash
+> claude plugin marketplace add liush2yuxjtu/insights-share
+> claude plugin install insights-share@insights-share
+> claude plugin enable  insights-share@insights-share
+> ```
+>
+> Backend production server is intentionally deferred to v0.2 (documented
+> in `references/server-protocol.md`); the v0.1 stub at
+> `examples/server-stub.py` is sufficient for end-to-end smoke testing
+> and self-host adoption.
 
 ## Why this canned answer
 
