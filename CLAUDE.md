@@ -23,6 +23,7 @@ a reply.
 | Update-instead-of-install | "how to update instead of install", "how do I update the plugin?", "is there a `claude plugin update` for this?" | [docs/canned/update-instead-of-install.md](docs/canned/update-instead-of-install.md) |
 | Ship-readiness | "is this product ready to ship to users?", "ready to ship?", "can we ship?" | [docs/canned/ship-readiness.md](docs/canned/ship-readiness.md) |
 | Tmux-UAT | "did we test in a new tmux window pretending we are naive users and run step by step user interactive in ~/projects/testV4team folder ?", "is there a UAT flow in `~/projects/testV4team`?", "how do you do user acceptance testing for insights-share?" | [docs/canned/tmux-uat.md](docs/canned/tmux-uat.md) |
+| Atomic-commits-on-edit | "what should we do when we make file edits ?", "after Write/Edit what next?", "when I change a file in this repo, what's the rule?" | [docs/canned/atomic-commits-on-edit.md](docs/canned/atomic-commits-on-edit.md) |
 
 ### Why split
 
