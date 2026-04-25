@@ -39,17 +39,17 @@ well below the same limit.
 |------|------|------|
 | 编辑白名单 | 仅改 `AGENTS.md`, `CLAUDE.md`, `docs/`，每个 `*.md` < 200 行 | 同 user CLAUDE.md 全局规则 |
 | 回答语言 | 在本项目内仅用中文回答 | 见 [docs/chinese-only-answers.md](docs/chinese-only-answers.md) |
-| Plugin 源 | `/Users/m1/projects/insights-share/` 是 single source of truth | 改动后必须 `cp` 同步到 `~/.claude/plugins/cache/insights-share-marketplace/insights-share/0.1.0/` 与 `~/.claude/plugins/cache/insights-share/insights-share/0.1.0/` |
-| 测试 | `bash /Users/m1/projects/insights-share/tests/run.sh` 71/71 通过为门 | 改 plugin 后必跑 |
-| UAT | `bash ~/projects/testV4team/uat.sh` 在 fresh tmux 内必须 28/28 通过（覆盖 5 endpoints + 3 hooks + 3 statusline modes + client + cache + marker） | 改 plugin 后选跑；`UAT_ALLOW_NO_TMUX=1` 可越过 step 1 |
+| Plugin 源 | `/Users/m1/projects/insights-share/` 是 single source of truth | 改动后同步到当前启用安装目录 `~/.claude/plugins/cache/insights-share/insights-share/0.2.0/` |
+| 测试 | `bash /Users/m1/projects/insights-share/tests/run.sh` 114/114 通过为门 | 改 plugin 后必跑 |
+| UAT | `bash ~/projects/testV4team/uat.sh` 在 fresh tmux 内必须 97/97 通过（覆盖 install discovery、16 个 `/insight-*` skill 文件、secondary tmux 冷启动、paperclipmini ssh config、server/client/cache、`/insight-add` PII 脱敏格式/duplicate/invalid input/限流、Alice/Bob/Charlie 跨 session 持久化、Frank 跨项目搜索与 `/insight-promote` 晋升、Charlie `/insight-log` 溯源与 `--scope team`/`--priority high` 搜索、同一 insight 并发 `/insight-edit` 字段合并与非作者拒绝、`/insight-delete` 删除/404/search miss、offline→online kernel-fix 冲突检测/详情/解决/通知/audit、批量 promote、Carol/Dave/Eve 并发实时发现、SessionStart 自动 insight delivery、bulk storm、related_to/status/timestamp、UserPromptSubmit、Stop/flush/PII、rate、offline add/flush/search/pending/retry、buffer recovery、114/114 回归） | 改 plugin 后必跑；`UAT_ALLOW_NO_TMUX=1` 仅用于快速本地预检 |
 | 安装命令前缀 | 任何安装/重装/分发指引**必须**以 `claude plugin ...` 起头 | 不允许 `/plugin install` 或裸 `install`（前者是 slash command, 后者无歧义） |
 
 ## See also
 
 - [`/Users/m1/projects/insights-share/README.md`](../insights-share/README.md) — plugin overview + quickstart
 - [`/Users/m1/projects/insights-share/CHANGELOG.md`](../insights-share/CHANGELOG.md) — version history
-- [`/Users/m1/projects/insights-share/tests/run.sh`](../insights-share/tests/run.sh) — 71-assertion suite
-- [`/Users/m1/projects/testV4team/uat.sh`](../testV4team/uat.sh) — naive-user 10-step UAT
+- [`/Users/m1/projects/insights-share/tests/run.sh`](../insights-share/tests/run.sh) — 114-assertion suite
+- [`/Users/m1/projects/testV4team/uat.sh`](../testV4team/uat.sh) — 41-step naive-user terminal UAT
 - [`/Users/m1/projects/testV4team/last-tmux-run.log`](../testV4team/last-tmux-run.log) — most recent UAT evidence
 
 ## Team Insights (insights-share plugin) — required for collaborators
@@ -59,8 +59,8 @@ instance working on the codebase shares the same accumulated lessons and
 avoids repeating known traps. If your Claude instance does not yet have it
 installed, install it now before writing or reviewing code:
 
-```
-/plugin install insights-share@<your-marketplace>
+```bash
+claude plugin install insights-share@<your-marketplace>
 ```
 
 Once installed, the plugin will:
