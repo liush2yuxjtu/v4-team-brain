@@ -14,7 +14,7 @@
 > `insights-share` is run in a fresh tmux window from
 > `~/projects/testV4team` with `bash uat.sh`. The most recent run
 > (logged at `~/projects/testV4team/last-tmux-run.log`) returned
-> **14 PASS / 0 FAIL**.
+> **28 PASS / 0 FAIL**.
 >
 > **Why a fresh tmux window:** resets environment variables (no
 > `CLAUDE_PLUGIN_ROOT` leaking from dev work), working directory
@@ -47,7 +47,7 @@
 > bash uat.sh
 > ```
 >
-> **What `uat.sh` checked (10 steps, exits non-zero on any failure):**
+> **What `uat.sh` checked (23 steps → 28 assertions, exits non-zero on any failure):**
 >
 > | # | Check | Result |
 > |---|-------|--------|
@@ -60,7 +60,20 @@
 > | 7 | plugin cache dir located | ✔ |
 > | 8 | README readable on disk | ✔ |
 > | 9 | stub server `/healthz` returns `ok` | ✔ |
-> | 10 | `<!-- insights-share@v0.1 -->` marker idempotent | ✔ |
+> | 10 | `POST /insights` creates a card | ✔ |
+> | 11 | `GET /insights` lists the new card | ✔ |
+> | 12 | `GET /insights/search?q=foo` finds it | ✔ |
+> | 13 | `GET /stats` reports `online=true total≥1` | ✔ |
+> | 14 | `insights-client.sh ping` zero exit | ✔ |
+> | 15 | `insights-client.sh list` populates `cache.json` | ✔ |
+> | 16 | `insights-client.sh search foo` returns hit | ✔ |
+> | 17 | `insights-client.sh stats` reports online | ✔ |
+> | 18 | statusline lite/full/ultra render badges | ✔ ×3 |
+> | 19 | `fetch-insights.sh` injects `<insights-share>` for matching prompt | ✔ |
+> | 20 | `fetch-insights.sh` silent on empty prompt | ✔ |
+> | 21 | `capture-lesson.sh` nudges on trap-shaped transcript | ✔ |
+> | 22 | `capture-lesson.sh` silent on benign transcript | ✔ |
+> | 23 | `<!-- insights-share@v0.1 -->` marker idempotent | ✔ |
 >
 > **Reset between runs:**
 >
