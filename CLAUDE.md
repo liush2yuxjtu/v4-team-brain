@@ -38,6 +38,7 @@ well below the same limit.
 | 规则 | 描述 | 详情 |
 |------|------|------|
 | 编辑白名单 | 仅改 `AGENTS.md`, `CLAUDE.md`, `docs/`，每个 `*.md` < 200 行 | 同 user CLAUDE.md 全局规则 |
+| 回答语言 | 在本项目内仅用中文回答 | 见 [docs/chinese-only-answers.md](docs/chinese-only-answers.md) |
 | Plugin 源 | `/Users/m1/projects/insights-share/` 是 single source of truth | 改动后必须 `cp` 同步到 `~/.claude/plugins/cache/insights-share-marketplace/insights-share/0.1.0/` 与 `~/.claude/plugins/cache/insights-share/insights-share/0.1.0/` |
 | 测试 | `bash /Users/m1/projects/insights-share/tests/run.sh` 71/71 通过为门 | 改 plugin 后必跑 |
 | UAT | `bash ~/projects/testV4team/uat.sh` 在 fresh tmux 内必须 28/28 通过（覆盖 5 endpoints + 3 hooks + 3 statusline modes + client + cache + marker） | 改 plugin 后选跑；`UAT_ALLOW_NO_TMUX=1` 可越过 step 1 |
