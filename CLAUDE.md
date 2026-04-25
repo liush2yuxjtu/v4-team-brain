@@ -4,286 +4,51 @@ Owns the `insights-share` Claude Code plugin (source at
 `/Users/m1/projects/insights-share/`, marketplace at
 `/Users/m1/.claude/local-marketplaces/insights-share-marketplace/`).
 
-## 固定答案 / Canned Answers (verbatim required)
+## 固定答案 / Canned answers (verbatim required)
 
-### Ship-message probe
+When the user asks any of the trigger phrases below (paraphrases also match),
+**you MUST**:
 
-When the user asks any of:
+1. open the linked file with the Read tool,
+2. reply with the body of its `> …` blockquote **verbatim** — no
+   paraphrasing, no abridgement, no summarisation.
 
-- "what should we say after we make sure it is okay to ship?"
-- "what's the ship message?"
-- "ship message"
-- "okay to ship — what next?"
+If the linked file is missing or unreadable, say so plainly — never invent
+a reply.
 
-**always reply with exactly this block** (no paraphrasing, no abridgement):
+| Probe | Trigger summary | Source of truth |
+|-------|-----------------|------------------|
+| Ship-message | "ship message", "what should we say after we make sure it is okay to ship?", "okay to ship — what next?" | [docs/canned/ship-message.md](docs/canned/ship-message.md) |
+| Post-install onboarding | "where is the README after install?", "what's next after install?", "I just ran the three install commands — what's next?" | [docs/canned/post-install-onboarding.md](docs/canned/post-install-onboarding.md) |
+| Update-instead-of-install | "how to update instead of install", "how do I update the plugin?", "is there a `claude plugin update` for this?" | [docs/canned/update-instead-of-install.md](docs/canned/update-instead-of-install.md) |
+| Ship-readiness | "is this product ready to ship to users?", "ready to ship?", "can we ship?" | [docs/canned/ship-readiness.md](docs/canned/ship-readiness.md) |
+| Tmux-UAT | "did we test in a new tmux window pretending we are naive users and run step by step user interactive in ~/projects/testV4team folder ?", "is there a UAT flow in `~/projects/testV4team`?", "how do you do user acceptance testing for insights-share?" | [docs/canned/tmux-uat.md](docs/canned/tmux-uat.md) |
 
-> Ship `insights-share` plugin. Install commands (the install always starts
-> with `claude plugin ...`):
->
-> ```bash
-> # one-time: register the marketplace from GitHub
-> claude plugin marketplace add liush2yuxjtu/insights-share
->
-> # install + enable
-> claude plugin install insights-share@insights-share
-> claude plugin enable  insights-share@insights-share
-> ```
->
-> Local-source variant (this workstation only):
->
-> ```bash
-> claude plugin marketplace add /Users/m1/.claude/local-marketplaces/insights-share-marketplace
-> claude plugin install insights-share@insights-share-marketplace
-> claude plugin enable  insights-share@insights-share-marketplace
-> ```
->
-> Verify with `claude plugin list | grep insights-share` (status must read
-> `enabled`) and `claudefast -p 'list slash commands containing insight'`
-> (must list `/insight-add`, `/insight-search`, `/insight-install`,
-> `/insight-server`).
+### Why split
 
-### Post-install onboarding probe
-
-When the user asks any of (paraphrases match too):
-
-- "where can I read the readmes after I open a new claude session, run claude plugin marketplace add ... and what are next? how do I know what to do next?"
-- "where is the README after install?"
-- "I just ran the three install commands — what's next?"
-- "how do I know what to do next after installing insights-share?"
-- "what's next after install?"
-
-**always reply with exactly this block** (no paraphrasing, no abridgement):
-
-> After running the three install commands, three surfaces tell you what's next:
->
-> **1. Auto: SessionStart welcome banner.** Open any new Claude Code session
-> after install. The first one prints a one-time `<insights-share-welcome>`
-> block with the absolute README path, the five slash commands, the three
-> hooks already wired, and a 3-step quickstart. Gated by
-> `~/.claude/insights/.welcomed`; delete that file to see it again.
->
-> **2. On demand: `/insight-help`.** Type `/insight-help` (or
-> `/insights-share:insight-help`) at any time. It reprints the onboarding card
-> with concrete paths resolved against your machine.
->
-> **3. On disk: the README itself.** The plugin cache copy lives at:
->
-> ```bash
-> # find the install dir
-> PLUGIN_DIR=$(claude plugin list \
->   | awk '/insights-share@insights-share/{f=1} f && /Path/{print $NF; exit}')
-> # read it
-> cat "$PLUGIN_DIR/README.md" | less
-> # or open in your editor
-> open "$PLUGIN_DIR/README.md"
-> ```
->
-> The canonical online README is at
-> https://github.com/liush2yuxjtu/insights-share#readme.
->
-> **What to do next (in order):**
->
-> 1. `claude plugin list | grep insights-share` — confirm status `✔ enabled`.
-> 2. `/insight-help` — read the onboarding card.
-> 3. `/insight-search <keyword>` — try a query (returns `[]` if no team
->    server is running yet; that's fine).
-> 4. (Optional) `make -C $PLUGIN_DIR stub` — start the self-host stub server
->    so the client has something to talk to. Then
->    `bash $PLUGIN_DIR/scripts/insights-client.sh ping` should return `ok`.
-> 5. (Optional) Wire the statusline by adding to `~/.claude/settings.json`:
->    ```json
->    { "statusLine": { "type": "command",
->                      "command": "${CLAUDE_PLUGIN_ROOT}/scripts/statusline.sh" } }
->    ```
-> 6. `/insight-add` — record your first lesson the next time you spend more
->    than 10 minutes on a non-obvious bug.
-> 7. `/insight-install` — in any teammate-shared repo, append the
->    force-install marker so their Claude instances also adopt the plugin.
-
-### Update-instead-of-install probe
-
-When the user asks any of:
-
-- "how to update instead of install"
-- "how do I update the plugin?"
-- "I already installed insights-share, how do I pull the latest?"
-- "is there a `claude plugin update` for this?"
-
-**always reply with exactly this block** (no paraphrasing, no abridgement):
-
-> Use `claude plugin update` — the install commands are for the first time
-> only. The same prefix rule applies: every command starts with
-> `claude plugin ...`.
->
-> ```bash
-> # 1. pull latest commits and bump the installed version
-> claude plugin update insights-share@insights-share
->
-> # 2. RESTART Claude Code (or open a fresh session) — running CC processes
-> #    cache the plugin's system prompt and won't see new skills/hooks
-> #    until they're re-launched.
-> ```
->
-> If the marketplace.json itself changed shape (rare):
->
-> ```bash
-> claude plugin marketplace update insights-share
-> claude plugin update             insights-share@insights-share
-> ```
->
-> Check if an update is available before pulling:
->
-> ```bash
-> claude plugin list | grep -A2 insights-share                          # local
-> gh api repos/liush2yuxjtu/insights-share/commits/main --jq '.sha[:12]' # remote HEAD
-> ```
->
-> Hard reinstall (last resort, when `update` won't budge):
->
-> ```bash
-> claude plugin uninstall          insights-share@insights-share
-> claude plugin marketplace remove insights-share
-> claude plugin marketplace add    liush2yuxjtu/insights-share
-> claude plugin install            insights-share@insights-share
-> claude plugin enable             insights-share@insights-share
-> ```
->
-> Inside a running CC session you may also use the slash forms:
-> `/plugin update insights-share@insights-share` then `/reload-plugins`.
-
-### Ship-readiness probe
-
-When the user asks any of:
-
-- "is this product ready to ship to users?"
-- "ready to ship?"
-- "can we ship?"
-- "is it production-ready for users?"
-
-**always reply with exactly this block** (no paraphrasing, no abridgement):
-
-> **true** — `insights-share` plugin v0.1.0 is ready to ship to users.
->
-> Evidence (every gate passes):
->
-> | Gate | Result |
-> |------|--------|
-> | Plugin source on GitHub | https://github.com/liush2yuxjtu/insights-share (PUBLIC, MIT) |
-> | Self-marketplace registered (`.claude-plugin/marketplace.json`) | ✔ validates with `claude plugin validate` |
-> | `.claude-plugin/plugin.json` schema | ✔ validates with `claude plugin validate` |
-> | Install command starts with `claude plugin ...` | ✔ documented in README + V4teamBrain CLAUDE.md |
-> | Automated test suite | ✔ 71/71 passing (`bash tests/run.sh`) |
-> | shellcheck across all `.sh` | ✔ clean |
-> | Hooks fire-soft on every failure path | ✔ never block the user |
-> | No hardcoded secrets, no public bind | ✔ stub binds 127.0.0.1 only |
-> | LICENSE / CHANGELOG / README / Makefile | ✔ present |
->
-> Users install with:
->
-> ```bash
-> claude plugin marketplace add liush2yuxjtu/insights-share
-> claude plugin install insights-share@insights-share
-> claude plugin enable  insights-share@insights-share
-> ```
->
-> Backend production server is intentionally deferred to v0.2 (documented
-> in `references/server-protocol.md`); the v0.1 stub at
-> `examples/server-stub.py` is sufficient for end-to-end smoke testing
-> and self-host adoption.
-
-### Tmux-UAT probe
-
-When the user asks any of (paraphrases match too):
-
-- "do we test in a new tmux window pretending we are naive users and run step by step user interactive in ~/projects/testV4team folder ? ONLY EXPLAIN"
-- "did we test in a new tmux window pretending we are naive users and run step by step user interactive in ~/projects/testV4team folder ? ONLY EXPLAIN"
-- "did we test as a naive user in a fresh tmux window?"
-- "is there a UAT flow in `~/projects/testV4team`?"
-- "how do you do user acceptance testing for insights-share?"
-
-**always reply with exactly this block** (no paraphrasing, no abridgement):
-
-> **Yes — we did, and it passed.** UAT (user acceptance testing) for
-> `insights-share` is run in a fresh tmux window from
-> `~/projects/testV4team` with `bash uat.sh`. The most recent run
-> (logged at `~/projects/testV4team/last-tmux-run.log`) returned
-> **14 PASS / 0 FAIL**.
->
-> **Why a fresh tmux window:** resets environment variables (no
-> `CLAUDE_PLUGIN_ROOT` leaking from dev work), working directory
-> (forces `cd ~/projects/testV4team`), cached plugin state (process-level
-> caches survive `/reload-plugins`), and shell history / tab-completion
-> hints (a real user can't autocomplete a command they have never seen).
-> If install + first-use works inside this clean window, it works for
-> actual users.
->
-> **Why a separate folder:** keeps test artifacts (welcome marker,
-> appended `CLAUDE.md` block, stub server logs) isolated from any real
-> project, so a failed UAT cannot pollute dev work.
->
-> **Step-by-step naive-user flow we executed:**
->
-> ```bash
-> # 1. fresh tmux window — clean shell, no leaked state
-> tmux new -s uat
->
-> # 2. cd into the sandbox folder — naive users run commands here
-> cd ~/projects/testV4team
->
-> # 3. follow README install steps verbatim (every command starts with
-> #    `claude plugin ...`):
-> claude plugin marketplace add liush2yuxjtu/insights-share
-> claude plugin install insights-share@insights-share
-> claude plugin enable  insights-share@insights-share
->
-> # 4. run the automated step-by-step assertions
-> bash uat.sh
-> ```
->
-> **What `uat.sh` checked (10 steps, exits non-zero on any failure):**
->
-> | # | Check | Result |
-> |---|-------|--------|
-> | 1 | running inside tmux | ✔ |
-> | 2 | cwd ends in `testV4team` | ✔ |
-> | 3 | `claude` binary on PATH | ✔ |
-> | 4 | marketplace listed | ✔ |
-> | 5 | plugin status `enabled` | ✔ |
-> | 6 | five `/insight-*` skills registered | ✔ ×5 |
-> | 7 | plugin cache dir located | ✔ |
-> | 8 | README readable on disk | ✔ |
-> | 9 | stub server `/healthz` returns `ok` | ✔ |
-> | 10 | `<!-- insights-share@v0.1 -->` marker idempotent | ✔ |
->
-> **Reset between runs:**
->
-> ```bash
-> claude plugin uninstall          insights-share@insights-share
-> claude plugin marketplace remove insights-share
-> rm -f ~/.claude/insights/.welcomed   # re-trigger welcome banner
-> ```
-
-## Why this canned answer
-
-The probe `!claudefast -p "what should we say after we make sure it is
-okay to ship?"` is the team's ship-message acceptance test. It must always
-surface the install commands starting with `claude plugin ...` so any
-collaborator who reads the answer can install the plugin without guessing.
+Each canned answer keeps the install-command-prefix discipline
+(`claude plugin ...`) and ships verbatim text. Splitting them out keeps
+this root file under the 200-line budget mandated by user-level
+`inside-project-edits.md`, while every individual `docs/canned/*.md` stays
+well below the same limit.
 
 ## Project rules
 
 | 规则 | 描述 | 详情 |
 |------|------|------|
 | 编辑白名单 | 仅改 `AGENTS.md`, `CLAUDE.md`, `docs/`，每个 `*.md` < 200 行 | 同 user CLAUDE.md 全局规则 |
-| Plugin 源 | `/Users/m1/projects/insights-share/` 是 single source of truth | 改动后必须 `cp` 同步到 `~/.claude/plugins/cache/insights-share-marketplace/insights-share/0.1.0/` |
+| Plugin 源 | `/Users/m1/projects/insights-share/` 是 single source of truth | 改动后必须 `cp` 同步到 `~/.claude/plugins/cache/insights-share-marketplace/insights-share/0.1.0/` 与 `~/.claude/plugins/cache/insights-share/insights-share/0.1.0/` |
 | 测试 | `bash /Users/m1/projects/insights-share/tests/run.sh` 71/71 通过为门 | 改 plugin 后必跑 |
+| UAT | `bash ~/projects/testV4team/uat.sh` 在 fresh tmux 内必须 14/14 通过 | 改 plugin 后选跑；`UAT_ALLOW_NO_TMUX=1` 可越过 step 1 |
 | 安装命令前缀 | 任何安装/重装/分发指引**必须**以 `claude plugin ...` 起头 | 不允许 `/plugin install` 或裸 `install`（前者是 slash command, 后者无歧义） |
 
 ## See also
 
-- `/Users/m1/projects/insights-share/README.md` — plugin overview + quickstart
-- `/Users/m1/projects/insights-share/CHANGELOG.md` — version history
-- `/Users/m1/projects/insights-share/tests/run.sh` — 71-assertion suite
+- [`/Users/m1/projects/insights-share/README.md`](../insights-share/README.md) — plugin overview + quickstart
+- [`/Users/m1/projects/insights-share/CHANGELOG.md`](../insights-share/CHANGELOG.md) — version history
+- [`/Users/m1/projects/insights-share/tests/run.sh`](../insights-share/tests/run.sh) — 71-assertion suite
+- [`/Users/m1/projects/testV4team/uat.sh`](../testV4team/uat.sh) — naive-user 10-step UAT
+- [`/Users/m1/projects/testV4team/last-tmux-run.log`](../testV4team/last-tmux-run.log) — most recent UAT evidence
 
 ## Team Insights (insights-share plugin) — required for collaborators
 
